@@ -1,0 +1,40 @@
+---
+title: "ESM 244 Lab 1"
+author: "Bren Comms Department"
+date: "1/6/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+library(here)
+library(sf)
+library(tmap)
+library(dplyr)
+```
+
+### Read in SF trees data
+
+```{r}
+sf_trees <- read_csv(here("data", "sf_trees","sf_trees.csv"))
+```
+
+### Basic wrangling reminders
+
+Refresh some skillss for daata wrangling & summary statistics using functions in the 'dplyr' paackage.
+
+Find the top 5 highest observations of trees by legal status, do some wrangling, and make a graph.
+```{r}
+# Wrangling on types of tree by legal status
+top_5_status <- sf_trees %>% 
+  count(legal_status) %>% 
+  drop_na(legal_status) %>% #drop NAs in any row where you don't want them based on column variables
+  rename(tree_count = n) %>% #new name on the left, old name on the right
+  relocate(tree_count) %>% #moves tree_count to the first column position
+  #just keep legal_status categories with top tree_count values
+  slice_max(tree_count, n = 5) #to identify rows with highest value specified
+  
+```
+
