@@ -87,4 +87,56 @@ sf_trees_unite <- sf_trees %>%
   # unite("name of new united column", column 1 to unite:column 2 to unite, sep = "type of separator")
 ```
 
+### Make some aactual maps of blackwood aacaciaa trees in SF
+
+'st_as_sf()' to convert latitude & longitude to spatial coordinates.
+
+```{r}
+# CRS coordinates transforms spherical data for 2d map visualization
+
+blackwood_acacia_sp <- blackwood_acacia %>% 
+  drop_na(longitude, latitude) %>% #get rid of observations where lat or long are missing
+  st_as_sf(coords = c("longitude", "latitude")) #indicates that variables are storing long and lat data are geographic points. Here in coords = c() you are giving the variable names for the lat and long points
+
+# Assign a data coordinate system of CRS (4326)
+st_crs(blackwood_acacia_sp) = 4326
+
+ggplot(data = blackwood_acacia_sp) + 
+  geom_sf(color = "darkgreen")+
+  theme_void()
+```
+
+Read in SF roads shapefile to give the map meaning!
+```{r}
+sf_map <- read_sf(here("data","sf_map", "tl_2017_06075_roads.shp"))
+
+#check using st_transform(sf_map) to make sure it's the correct shp file
+
+#Roads and tree points bust be in the same coordinate system
+st_transform(sf_map, 4326)
+
+#Now plot
+ggplot(data = sf_map) +
+  geom_sf() +
+  theme_void()
+```
+
+Combine blackwood acacia tree observations & SF roads map:
+
+```{r}
+ggplot()+
+  geom_sf(data = sf_map, size = 0.1, color = "darkgray")+
+  geom_sf(data = blackwood_acacia_sp, size = 0.5, color = "red") +
+  theme_void()
+```
+
+Wouldn't it be cool if this map was interactive?!
+```{r}
+tmap_mode("view") #set tmap mode to interactive viewing
+
+tm_shape(blackwood_acacia_sp) +
+  tm_dots()
+
+#Now you can zoom in! Turns out there's a blackwood acaia tree on my block!
+```
 
