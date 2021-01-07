@@ -23,7 +23,7 @@ sf_trees <- read_csv(here("data", "sf_trees","sf_trees.csv"))
 
 ### Basic wrangling reminders
 
-Refresh some skillss for daata wrangling & summary statistics using functions in the 'dplyr' paackage.
+Refresh some skills for daata wrangling & summary statistics using functions in the 'dplyr' paackage.
 
 Find the top 5 highest observations of trees by legal status, do some wrangling, and make a graph.
 ```{r}
@@ -37,4 +37,54 @@ top_5_status <- sf_trees %>%
   slice_max(tree_count, n = 5) #to identify rows with highest value specified
   
 ```
+
+Make a graph of those top 5 obsesrvations by legal status.
+```{r}
+ggplot(data = top_5_status, aes(x = fct_reorder(legal_status, tree_count), y = tree_count)) + #fct_reorder can be reversed (asc vs. desc)
+  geom_col() +
+  labs(x = "Legal Status",
+       y = "Tree Count") +
+  coord_flip() + #flips the x and y axes
+  theme_minimal()
+```
+
+### A few more data wraangling refresher examples
+
+Only want to keep observations (rows) for Blackwood Acacia.
+
+```{r}
+blackwood_acacia_Psite <- sf_trees %>% 
+  filter(legal_status == "Permitted Site") #fxn we'll use the most in wrangling data
+
+# Exaample: keep any observations where a certain string is detected anywhere within that variable for an observation
+blackwood_acacia <- sf_trees %>% 
+  filter(str_detect(species, "Blackwood Acacia")) %>% 
+  select(legal_status, date, latitude, longitude) #useful for picking/excluding columns, helpful when there are too many
+
+#Plot trees! (A preview! Because R doesn't know these are geographic points yet)
+ggplot(data = blackwood_acacia, aes(x = longitude, y = latitude)) +
+  geom_point()
+```
+
+### tidyr::separate() and unite() functions
+
+Useful for combining or separating fxns.
+
+```{r}
+#split columns by separators
+sf_trees_sep <- sf_trees %>% 
+  separate(species, into = c("spp_scientific","spp_common"), sep = "::")
+  # separate(column, into = c("new column name 1", "new column name 2"), sep = "type of separator")
+  
+```
+
+Example: tidyr::unite()
+
+Combine tree and legal_status columns
+```{r}
+sf_trees_unite <- sf_trees %>% 
+  unite("id_status", tree_id:legal_status, sep = "_cool!_")
+  # unite("name of new united column", column 1 to unite:column 2 to unite, sep = "type of separator")
+```
+
 
